@@ -1,0 +1,1878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DevOps Flashcards</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; padding: 20px 16px 60px; color: #1a1a2e; }
+
+  .header { text-align: center; margin-bottom: 24px; }
+  .header h1 { font-size: 1.7rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 4px; }
+  .header p { color: #64748b; font-size: 0.85rem; }
+
+  .legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 16px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; color: #475569; font-weight: 600; }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+
+  .filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 7px; margin-bottom: 20px; }
+  .filter-btn { padding: 5px 13px; border-radius: 20px; border: 2px solid #e2e8f0; background: white; font-size: 0.75rem; font-weight: 700; cursor: pointer; transition: all 0.15s; color: #64748b; }
+  .filter-btn:hover { transform: translateY(-1px); box-shadow: 0 3px 8px rgba(0,0,0,0.1); }
+  .filter-btn.active { color: white; border-color: transparent; }
+  .filter-btn[data-filter="all"].active    { background: #1a1a2e; }
+  .filter-btn[data-filter="concept"].active { background: #6366f1; }
+  .filter-btn[data-filter="aws"].active    { background: #0ea5e9; }
+  .filter-btn[data-filter="v1x"].active    { background: #3b82f6; }
+  .filter-btn[data-filter="v2x"].active    { background: #f97316; }
+  .filter-btn[data-filter="v3x"].active    { background: #22c55e; }
+  .filter-btn[data-filter="v4x"].active    { background: #ec4899; }
+  .filter-btn[data-filter="v5x"].active    { background: #14b8a6; }
+  .filter-btn[data-filter="gotcha"].active  { background: #ef4444; }
+
+  .counter { text-align: center; font-size: 0.75rem; color: #94a3b8; margin-bottom: 16px; }
+
+  .grid { columns: 4 240px; gap: 12px; }
+
+  .card { break-inside: avoid; margin-bottom: 12px; background: white; border-radius: 16px; padding: 18px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.07); transition: transform 0.15s, box-shadow 0.15s; border-top: 4px solid transparent; }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 5px 16px rgba(0,0,0,0.1); }
+  .card.hidden { display: none; }
+
+  .card.concept { border-top-color: #6366f1; }
+  .card.aws     { border-top-color: #0ea5e9; }
+  .card.v1x     { border-top-color: #3b82f6; }
+  .card.v2x     { border-top-color: #f97316; }
+  .card.v3x     { border-top-color: #22c55e; }
+  .card.v4x     { border-top-color: #ec4899; }
+  .card.v5x     { border-top-color: #14b8a6; }
+  .card.gotcha  { border-top-color: #ef4444; }
+
+  .tag { display: inline-block; padding: 2px 9px; border-radius: 20px; font-size: 0.67rem; font-weight: 700; letter-spacing: 0.3px; margin-bottom: 10px; text-transform: uppercase; }
+  .concept .tag { background: #eef2ff; color: #6366f1; }
+  .aws .tag     { background: #e0f2fe; color: #0284c7; }
+  .v1x .tag     { background: #eff6ff; color: #3b82f6; }
+  .v2x .tag     { background: #fff7ed; color: #ea580c; }
+  .v3x .tag     { background: #f0fdf4; color: #16a34a; }
+  .v4x .tag     { background: #fdf2f8; color: #db2777; }
+  .v5x .tag     { background: #f0fdfa; color: #0d9488; }
+  .gotcha .tag  { background: #fef2f2; color: #dc2626; }
+
+  .card-front .emoji { font-size: 1.8rem; margin-bottom: 8px; display: block; line-height: 1; }
+  .card-front h3 { font-size: 0.9rem; font-weight: 700; line-height: 1.45; color: #1e293b; margin-bottom: 12px; }
+  .hint { font-size: 0.67rem; color: #cbd5e1; }
+
+  .card-back { display: none; }
+  .card.revealed .card-front { display: none; }
+  .card.revealed .card-back  { display: block; }
+
+  .card-back .answer-label { font-size: 0.67rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; color: #94a3b8; margin-bottom: 8px; }
+  .card-back .metaphor { font-size: 0.82rem; font-style: italic; color: #64748b; margin-bottom: 10px; padding: 8px 10px; background: #f8fafc; border-radius: 8px; line-height: 1.5; }
+  .card-back ul { padding-left: 15px; margin-bottom: 6px; }
+  .card-back ul li { font-size: 0.84rem; line-height: 1.55; color: #334155; margin-bottom: 3px; }
+  .card-back p { font-size: 0.84rem; line-height: 1.55; color: #334155; margin-bottom: 6px; }
+  .card-back .code { font-family: 'SF Mono', 'Consolas', monospace; font-size: 0.76rem; background: #f1f5f9; padding: 1px 5px; border-radius: 4px; color: #0f172a; }
+  .back-hint { font-size: 0.65rem; color: #e2e8f0; margin-top: 10px; text-align: right; }
+
+  @media (max-width: 560px) { .grid { columns: 1; } body { padding: 12px 10px 40px; } }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>DevOps Flashcards</h1>
+  <p>Click a card to reveal the answer · click again to flip back · 100 cards</p>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#6366f1"></div>Concepts</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#0ea5e9"></div>AWS</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#3b82f6"></div>v1.x</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#f97316"></div>v2.x</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#22c55e"></div>v3.x</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ec4899"></div>v4.x</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#14b8a6"></div>v5.x</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#ef4444"></div>Gotchas</div>
+</div>
+
+<div class="filters">
+  <button class="filter-btn active" data-filter="all">All (100)</button>
+  <button class="filter-btn" data-filter="concept">Concepts</button>
+  <button class="filter-btn" data-filter="aws">AWS</button>
+  <button class="filter-btn" data-filter="v1x">v1.x Manual</button>
+  <button class="filter-btn" data-filter="v2x">v2.x CI/CD</button>
+  <button class="filter-btn" data-filter="v3x">v3.x UserData</button>
+  <button class="filter-btn" data-filter="v4x">v4.x Docker</button>
+  <button class="filter-btn" data-filter="v5x">v5.x Ansible</button>
+  <button class="filter-btn" data-filter="gotcha">Gotchas</button>
+</div>
+
+<div class="counter" id="counter">100 cards</div>
+<div class="grid" id="grid">
+
+<!-- ════════════ CORE CONCEPTS ════════════ -->
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🖥️</span>
+    <h3>What is a server?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Like a restaurant that never closes — it waits for customers (requests) 24/7.</div>
+    <ul>
+      <li>A computer that runs continuously and responds to requests</li>
+      <li>In our case: an EC2 instance in AWS running LobeChat</li>
+      <li>Unlike your laptop, it has no screen — you control it via SSH</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">📍</span>
+    <h3>What is an IP address?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">The postal address of a server on the internet.</div>
+    <ul>
+      <li>Looks like: <span class="code">34.249.61.34</span></li>
+      <li>Your browser needs it to find LobeChat: <span class="code">http://34.249.61.34:3210</span></li>
+      <li>EC2 gets a new public IP every time it restarts</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🚪</span>
+    <h3>What is a port?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Different doors into the same building. The building is the server; the doors are ports.</div>
+    <ul>
+      <li>:22 → SSH (admin entrance)</li>
+      <li>:3210 → LobeChat (main door)</li>
+      <li>:9000 → MinIO API (storage door)</li>
+      <li>:9001 → MinIO Console (storage admin)</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🔑</span>
+    <h3>What is SSH?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A secure remote control for servers. Like controlling a robot on Mars — you type, it executes.</div>
+    <ul>
+      <li>Lets you run commands on a remote server from your terminal</li>
+      <li>Uses a key pair (.pem file) instead of a password</li>
+      <li>Command: <span class="code">ssh -i ~/.ssh/lobechat-key.pem ubuntu@34.x.x.x</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🗝️</span>
+    <h3>What is a public/private key pair for SSH?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A padlock (public key, stored on AWS) and the only key that opens it (private .pem, on your machine).</div>
+    <ul>
+      <li>AWS keeps the public key on your EC2 instance</li>
+      <li>You keep the private <span class="code">.pem</span> file — never share it</li>
+      <li>SSH proves you have the matching private key → access granted</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🗃️</span>
+    <h3>What is a database?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">An organized filing cabinet that never forgets anything and can find any file instantly.</div>
+    <ul>
+      <li>LobeChat uses PostgreSQL to store users, chats, settings</li>
+      <li>Runs on port 5432 (internal only — not exposed to internet)</li>
+      <li>Data survives app restarts because it's written to disk</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🏗️</span>
+    <h3>What is Infrastructure as Code (IaC)?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A blueprint for a house. Instead of building it brick by brick each time, give the blueprint to a robot and it builds identically every time.</div>
+    <ul>
+      <li>Write a YAML file describing what AWS resources you want</li>
+      <li>CloudFormation reads it and creates everything for you</li>
+      <li>Repeatable, versioned, shareable</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🌐</span>
+    <h3>What is a VPC?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Your private gated community inside AWS. Only your resources live here unless you open the gate.</div>
+    <ul>
+      <li>Virtual Private Cloud — isolated network in AWS</li>
+      <li>Contains: subnets, route tables, internet gateways, security groups</li>
+      <li>CIDR: <span class="code">10.0.0.0/16</span> = up to 65,536 private IPs available</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🏘️</span>
+    <h3>What is a subnet?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A street inside your gated community (VPC). Each street has its own range of house numbers.</div>
+    <ul>
+      <li>A smaller network segment inside the VPC</li>
+      <li>Our subnet: <span class="code">10.0.1.0/24</span> = 256 addresses</li>
+      <li>"Public subnet" = connected to internet via Internet Gateway</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🔒</span>
+    <h3>What is a Security Group?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A bouncer at the door of your EC2. By default blocks everything — you add specific guests to the allow list.</div>
+    <ul>
+      <li>Virtual firewall attached to an EC2 instance</li>
+      <li>Default: all incoming traffic blocked</li>
+      <li>You open specific ports: 22 (SSH), 3210 (app), 9000/9001 (MinIO)</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🚦</span>
+    <h3>What is an Internet Gateway and a Route Table?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Internet Gateway = the city gate. Route Table = the traffic signs inside telling cars where to go.</div>
+    <ul>
+      <li><strong>Internet Gateway:</strong> connects your VPC to the public internet</li>
+      <li><strong>Route Table:</strong> rules for where traffic is directed</li>
+      <li>Rule: "all traffic (0.0.0.0/0) → go through the Internet Gateway"</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">👶</span>
+    <h3>What is systemd?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A babysitter for your app. Starts it when the server boots, watches it, restarts it if it crashes.</div>
+    <ul>
+      <li>Linux's service manager — runs background processes</li>
+      <li><span class="code">systemctl start lobechat</span> — start the service</li>
+      <li><span class="code">systemctl status lobechat</span> — check if it's running</li>
+      <li><span class="code">journalctl -u lobechat -f</span> — live logs</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🔄</span>
+    <h3>What does "idempotent" mean?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Painting a white wall white again — same result, no damage from doing it twice.</div>
+    <ul>
+      <li>Running the same operation multiple times = same end result</li>
+      <li>✅ Ansible is idempotent — re-run safely if something fails</li>
+      <li>✅ CloudFormation is idempotent — only applies changes</li>
+      <li>❌ UserData is NOT — runs once on boot only</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">📦</span>
+    <h3>Container vs Virtual Machine — what's the difference?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">VM = renting a whole house. Container = renting one room in a hotel (shared building, private room).</div>
+    <ul>
+      <li>VM: full OS inside (heavy, slow to start, GBs)</li>
+      <li>Container: shares host OS kernel (light, starts in seconds, MBs)</li>
+      <li>Docker containers are the most common container type</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🔁</span>
+    <h3>What is CI/CD?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Cruise control for deployments. You push code → the robot tests it → the robot deploys it. No human needed.</div>
+    <ul>
+      <li>CI (Continuous Integration) = automatically test on every push</li>
+      <li>CD (Continuous Deployment) = automatically deploy after tests pass</li>
+      <li>v2.x implements this with GitHub Actions</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">📦</span>
+    <h3>What is a package manager?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">An app store for code. You say what you need, it downloads and installs it — with all its dependencies.</div>
+    <ul>
+      <li><span class="code">pnpm</span> / <span class="code">npm</span> — JavaScript packages</li>
+      <li><span class="code">apt-get</span> — Linux system packages</li>
+      <li><span class="code">uv</span> — Python packages (used for Ansible)</li>
+      <li><span class="code">bun</span> — fast JS runtime + package manager</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">💊</span>
+    <h3>What is a healthcheck?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A doctor knocking on the patient's door every 10 seconds to check they're alive and responding.</div>
+    <ul>
+      <li>A command Docker runs periodically on a container</li>
+      <li>If it fails N times → container marked "unhealthy"</li>
+      <li>Other containers with <span class="code">depends_on: condition: service_healthy</span> won't start until healthy</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🗺️</span>
+    <h3>What is the progression from v1.x to v5.x really teaching?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Learning to drive: first you push the car, then pedals, then cruise control, then self-driving.</div>
+    <ul>
+      <li>v1.x — do it all by hand (understand what's needed)</li>
+      <li>v2.x — automate it (CI/CD)</li>
+      <li>v3.x — codify infra (IaC)</li>
+      <li>v4.x — package the app (Docker)</li>
+      <li>v5.x — separate infra from config (CF + Ansible)</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">📂</span>
+    <h3>What is an .env file?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A sticky note with all the secret passwords your app needs — kept locked in a drawer, never shared.</div>
+    <ul>
+      <li>Stores configuration: DB passwords, API keys, URLs</li>
+      <li>Never committed to git (it's in <span class="code">.gitignore</span>)</li>
+      <li>LobeChat reads <span class="code">.env.local</span> at runtime</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card concept" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Concept</span>
+    <span class="emoji">🏃</span>
+    <h3>What does "booting" a server mean?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Like turning on a computer — hardware starts, OS loads, then it's ready to use. For EC2, this takes ~30–60 seconds.</div>
+    <ul>
+      <li>AWS allocates the virtual hardware</li>
+      <li>Ubuntu OS loads and initializes</li>
+      <li>SSH daemon starts — now you can connect</li>
+      <li>UserData runs at this exact moment (v3.x)</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<!-- ════════════ AWS ════════════ -->
+
+<div class="card aws" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">AWS</span>
+    <span class="emoji">🖥️</span>
+    <h3>What is EC2?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A virtual computer you rent by the hour from AWS. Like Airbnb but for servers.</div>
+    <ul>
+      <li>Elastic Compute Cloud — scalable virtual machines</li>
+      <li>We use <span class="code">c7a.2xlarge</span>: 8 vCPU, 16GB RAM (needed to build LobeChat)</li>
+      <li>Costs ~$0.35/hour — delete when done!</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card aws" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">AWS</span>
+    <span class="emoji">☁️</span>
+    <h3>What is CloudFormation?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">AWS's recipe book reader. You write the recipe (YAML), it cooks the infrastructure for you — and cleans up when you're done.</div>
+    <ul>
+      <li>AWS's native IaC tool</li>
+      <li>Creates all resources from a template file</li>
+      <li>Tracks everything it created → deletes it all with one command</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card aws" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">AWS</span>
+    <span class="emoji">📚</span>
+    <h3>What is a CloudFormation Stack?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A named folder that holds all the AWS resources created by one template. Delete the folder → everything inside is deleted.</div>
+    <ul>
+      <li>Our stack name: <span class="code">lobechat</span></li>
+      <li>Contains: VPC, subnet, SG, route table, EC2</li>
+      <li><span class="code">aws cloudformation delete-stack --stack-name lobechat</span> removes all of them</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card aws" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">AWS</span>
+    <span class="emoji">💿</span>
+    <h3>What is an AMI?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A frozen snapshot of an OS. Like a Windows installation disk — you use it to set up a new computer with a pre-configured system.</div>
+    <ul>
+      <li>Amazon Machine Image — the OS template for EC2</li>
+      <li>We use Ubuntu 24.04 LTS: <span class="code">ami-03446a3af42c5e74e</span></li>
+      <li>Different AMIs for different regions — use the right one!</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card aws" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">AWS</span>
+    <span class="emoji">⏱️</span>
+    <h3>What is STS and why do sandbox credentials expire?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Like a day pass to an amusement park — works great while valid, but expires at midnight for security.</div>
+    <ul>
+      <li>STS = Security Token Service — issues temporary credentials</li>
+      <li>Expires after a few hours (intentional security measure)</li>
+      <li>If credentials leak, they stop working automatically</li>
+      <li>Fix: re-export from Innovation Sandbox portal</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card aws" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">AWS</span>
+    <span class="emoji">💾</span>
+    <h3>What is an EBS volume?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">The hard drive attached to your EC2. Like a USB drive that plugs into your cloud computer.</div>
+    <ul>
+      <li>Elastic Block Store — persistent disk storage for EC2</li>
+      <li>We use 20GB gp3 (SSD-class) for all LobeChat files</li>
+      <li>Deleted when the stack is deleted (<span class="code">DeleteOnTermination: true</span>)</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card aws" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">AWS</span>
+    <span class="emoji">🪄</span>
+    <h3>What does `aws cloudformation deploy` actually do?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Handing your blueprint to the construction crew and waiting until the building is ready.</div>
+    <ul>
+      <li>Uploads your template to AWS</li>
+      <li>Creates a changeset (preview of changes)</li>
+      <li>Executes the changeset (creates all resources)</li>
+      <li>Waits and reports success or failure</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card aws" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">AWS</span>
+    <span class="emoji">📤</span>
+    <h3>What is a CloudFormation Output?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">The receipt after building your infra — it tells you the public IP, the URL, the SSH command to use.</div>
+    <ul>
+      <li>Values exported from a stack that you can query</li>
+      <li>Example outputs: PublicIP, LobeChatURL, SSHCommand</li>
+      <li>Query with: <span class="code">aws cloudformation describe-stacks --stack-name lobechat --query 'Stacks[0].Outputs'</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card aws" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">AWS</span>
+    <span class="emoji">🔮</span>
+    <h3>What is the EC2 metadata service (169.254.169.254)?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A magic mirror inside EC2 — ask it "who am I?" and it tells you your own public IP, instance ID, region.</div>
+    <ul>
+      <li>Only accessible from inside an EC2 instance</li>
+      <li>Used in UserData/Ansible to get the public IP dynamically</li>
+      <li><span class="code">curl http://169.254.169.254/latest/meta-data/public-ipv4</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card aws" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">AWS</span>
+    <span class="emoji">🌍</span>
+    <h3>What is a Region and Availability Zone?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Region = a city (Dublin). Availability Zone = separate buildings within that city.</div>
+    <ul>
+      <li>Region: <span class="code">eu-west-1</span> = Ireland</li>
+      <li>AZ: <span class="code">eu-west-1b</span> = one specific datacenter in Ireland</li>
+      <li>We deploy in eu-west-1 to be close to ESADE (Spain)</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<!-- ════════════ v1.x ════════════ -->
+
+<div class="card v1x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v1.x Manual</span>
+    <span class="emoji">🤔</span>
+    <h3>Why do the homeworks start with manual deployment (v1.x)?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">You appreciate GPS more after getting lost with a paper map once.</div>
+    <ul>
+      <li>Manual work teaches you what actually needs to happen</li>
+      <li>You can't automate what you don't understand</li>
+      <li>When Ansible or CloudFormation fail, you know how to fix them because you've done it by hand</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v1x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v1.x Manual</span>
+    <span class="emoji">🐘</span>
+    <h3>What is PostgreSQL and why does LobeChat need it?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">The filing room of LobeChat. Every message, user account, and setting is stored here permanently.</div>
+    <ul>
+      <li>Open-source relational database (like Excel but for apps)</li>
+      <li>Runs on port 5432 (internal, not exposed to internet)</li>
+      <li>LobeChat also needs <span class="code">pgvector</span> (AI embeddings) and <span class="code">pg_search</span> (full-text search)</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v1x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v1.x Manual</span>
+    <span class="emoji">🪣</span>
+    <h3>What is MinIO and why does LobeChat use it?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A self-hosted Google Drive for your server. Stores uploaded files, images, and attachments.</div>
+    <ul>
+      <li>S3-compatible object storage (same API as Amazon S3)</li>
+      <li>API on port 9000, web console on port 9001</li>
+      <li>LobeChat uploads images/files here; MinIO stores them</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v1x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v1.x Manual</span>
+    <span class="emoji">🧩</span>
+    <h3>LobeChat has two build steps. What are they and why?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Like a TV show with a backstage (server) and a stage (what audience sees). Both need to be built separately.</div>
+    <ul>
+      <li><span class="code">pnpm run build:spa</span> → builds the Vite SPA (the chat UI you see)</li>
+      <li><span class="code">pnpm run build:spa:copy</span> → copies it and generates templates</li>
+      <li><span class="code">pnpm run build</span> → builds the Next.js server (API, auth)</li>
+      <li>Skip the SPA step → blank white page after login</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v1x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v1.x Manual</span>
+    <span class="emoji">🧹</span>
+    <h3>What order must you delete manual AWS resources in?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Like dismantling a tent: remove the cover first, then the poles, then the stakes — reverse build order.</div>
+    <ul>
+      <li>1. Terminate EC2 + wait for it</li>
+      <li>2. Detach + delete Internet Gateway</li>
+      <li>3. Delete subnet</li>
+      <li>4. Delete security group</li>
+      <li>5. Delete custom route tables</li>
+      <li>6. Delete VPC</li>
+      <li>7. Delete key pair + local .pem</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v1x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v1.x Manual</span>
+    <span class="emoji">🤖</span>
+    <h3>What is Node.js and why does LobeChat need it?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">JavaScript used to only run in browsers. Node.js lets it run on servers too.</div>
+    <ul>
+      <li>JavaScript runtime for server-side code</li>
+      <li>LobeChat's backend (Next.js) runs on Node.js 20</li>
+      <li>Also needed to build the app (compile TypeScript, bundle assets)</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v1x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v1.x Manual</span>
+    <span class="emoji">🔄</span>
+    <h3>What is a database migration and why does LobeChat run one?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Rearranging the filing cabinet before opening the office — tables must exist before the app can store data.</div>
+    <ul>
+      <li>Creates the database tables LobeChat needs</li>
+      <li>Command: <span class="code">bun run db:migrate</span></li>
+      <li>Must run after PostgreSQL is set up and before LobeChat starts</li>
+      <li>If pg_search isn't enabled, this fails</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v1x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v1.x Manual</span>
+    <span class="emoji">📋</span>
+    <h3>What is a systemd service file?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A job description for systemd — tells it exactly how to run your app and what to do if it crashes.</div>
+    <ul>
+      <li>Defines: which user runs it, what command, what env vars</li>
+      <li><span class="code">Restart=always</span> → restart if it crashes</li>
+      <li><span class="code">EnvironmentFile=/opt/lobechat/.env.local</span> → loads secrets</li>
+      <li>Lives in <span class="code">/etc/systemd/system/lobechat.service</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<!-- ════════════ v2.x ════════════ -->
+
+<div class="card v2x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v2.x CI/CD</span>
+    <span class="emoji">🤖</span>
+    <h3>What is GitHub Actions?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A robot that lives inside GitHub and watches your repository. When you push code, it wakes up and runs your instructions.</div>
+    <ul>
+      <li>Automates tasks triggered by git events</li>
+      <li>Workflows defined in <span class="code">.github/workflows/*.yml</span></li>
+      <li>Can test, build, deploy, notify — anything scriptable</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v2x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v2.x CI/CD</span>
+    <span class="emoji">⚡</span>
+    <h3>What is a trigger in GitHub Actions?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">The alarm that wakes up the robot. "When THIS happens, do THAT."</div>
+    <ul>
+      <li><span class="code">on: push</span> → run when you push to a branch</li>
+      <li><span class="code">on: pull_request</span> → run when a PR is opened</li>
+      <li><span class="code">on: schedule</span> → run on a cron schedule</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v2x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v2.x CI/CD</span>
+    <span class="emoji">🔐</span>
+    <h3>What is a GitHub Secret and why not just hardcode credentials?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A safe in GitHub's vault. You put the credentials there — the robot can use them but no one can read them.</div>
+    <ul>
+      <li>Encrypted variables in GitHub Settings → Secrets</li>
+      <li>Referenced as <span class="code">${{ secrets.AWS_ACCESS_KEY_ID }}</span></li>
+      <li>Never appear in logs</li>
+      <li>Hardcoding = credentials in git history forever — very bad</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v2x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v2.x CI/CD</span>
+    <span class="emoji">🏃</span>
+    <h3>What is a runner in GitHub Actions?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">The robot's body — the actual computer where your pipeline commands run.</div>
+    <ul>
+      <li>GitHub-hosted runners: free VMs (Ubuntu, Windows, Mac)</li>
+      <li>Self-hosted: your own machine registered with GitHub</li>
+      <li>Each job gets a fresh runner — no state between runs</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v2x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v2.x CI/CD</span>
+    <span class="emoji">🔀</span>
+    <h3>What's the difference between CI and CD?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">CI = quality control at the factory (check before shipping). CD = the delivery truck (auto-ship after quality passes).</div>
+    <ul>
+      <li>CI: merge safely — run tests before code is accepted</li>
+      <li>CD: deploy automatically — no human clicks "deploy" button</li>
+      <li>Together: push → test → deploy, zero manual steps</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<!-- ════════════ v3.x ════════════ -->
+
+<div class="card v3x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v3.x CF + UserData</span>
+    <span class="emoji">📜</span>
+    <h3>What is UserData in EC2?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A post-it note left for the server when it wakes up for the first time. It reads it, follows the instructions, then never reads it again.</div>
+    <ul>
+      <li>A bash script embedded in the CloudFormation template</li>
+      <li>Runs once on first boot, as root, automatically</li>
+      <li>Logs to <span class="code">/var/log/user-data.log</span></li>
+      <li>NOT idempotent — fails? Destroy and redeploy.</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v3x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v3.x CF + UserData</span>
+    <span class="emoji">🛑</span>
+    <h3>What is `set -e` in bash?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A strict chef who walks out of the kitchen the moment any ingredient goes wrong — everything after that step is abandoned.</div>
+    <ul>
+      <li>Makes bash exit immediately if any command fails</li>
+      <li>Good: prevents running broken subsequent steps</li>
+      <li>Dangerous in UserData: fails at step 15 → steps 16–20 never run (service never created)</li>
+      <li>CloudFormation doesn't know — it thinks deployment succeeded</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v3x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v3.x CF + UserData</span>
+    <span class="emoji">🐘</span>
+    <h3>Why did pg_search fail even though we added it to postgresql.conf?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Like rewriting a memo while the boss is already in a meeting — they'll only see it next time they check in (restart).</div>
+    <ul>
+      <li><span class="code">apt-get install postgresql-16</span> auto-starts PostgreSQL</li>
+      <li>We then add pg_search to conf — but PostgreSQL already read the old conf</li>
+      <li><span class="code">systemctl start</span> = no-op (already running)</li>
+      <li>Fix: <span class="code">systemctl restart postgresql</span> — forces a config reload</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v3x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v3.x CF + UserData</span>
+    <span class="emoji">📚</span>
+    <h3>What is `shared_preload_libraries` in PostgreSQL?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A list of tools PostgreSQL packs in its backpack before leaving the house. Can't add tools after it's already out the door.</div>
+    <ul>
+      <li>Extensions listed here load when PostgreSQL starts</li>
+      <li>pg_search requires this — can't load dynamically at runtime</li>
+      <li>Add to <span class="code">postgresql.conf</span>, then restart Postgres</li>
+      <li>Then run <span class="code">CREATE EXTENSION IF NOT EXISTS pg_search;</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v3x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v3.x CF + UserData</span>
+    <span class="emoji">🔎</span>
+    <h3>UserData failed silently. How do you debug it?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">The flight recorder (black box) of your deployment. Everything that happened is recorded there.</div>
+    <ul>
+      <li>SSH into the instance</li>
+      <li>Check: <span class="code">sudo tail -50 /var/log/user-data.log</span></li>
+      <li>Look for error messages or where the log stops</li>
+      <li>Fix the issue, run remaining steps manually over SSH</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v3x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v3.x CF + UserData</span>
+    <span class="emoji">📝</span>
+    <h3>What is `!Sub` in a CloudFormation template?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A mail merge for your YAML — fill in the blanks with real values automatically.</div>
+    <ul>
+      <li>Substitutes variables into a string</li>
+      <li><span class="code">!Sub "http://${EC2Instance.PublicIp}:3210"</span></li>
+      <li>Replaces <span class="code">${EC2Instance.PublicIp}</span> with the actual IP at deploy time</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v3x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v3.x CF + UserData</span>
+    <span class="emoji">🔗</span>
+    <h3>What is `!Ref` in CloudFormation?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A shortcut that says "use whatever ID that resource got assigned when it was created."</div>
+    <ul>
+      <li>Returns the ID of a resource or value of a parameter</li>
+      <li><span class="code">!Ref VPC</span> → returns the VPC's ID (e.g. vpc-0e63174ee992)</li>
+      <li><span class="code">!Ref DBPassword</span> → returns the parameter value</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v3x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v3.x CF + UserData</span>
+    <span class="emoji">🔄</span>
+    <h3>What is `systemctl restart` vs `systemctl start`?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Start = turn on if off. Restart = turn off then on (even if already running). Only restart reloads the config.</div>
+    <ul>
+      <li><span class="code">start</span>: does nothing if already running</li>
+      <li><span class="code">restart</span>: stops then starts — always reloads config</li>
+      <li>After changing any config file → always use <span class="code">restart</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v3x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v3.x CF + UserData</span>
+    <span class="emoji">🎯</span>
+    <h3>What is the main weakness of UserData vs Ansible?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">UserData = send a letter with instructions and hope for the best. Ansible = sit next to the person and guide them step by step, with the ability to redo any step.</div>
+    <ul>
+      <li>UserData runs once — not retryable</li>
+      <li>CloudFormation can't tell if it worked</li>
+      <li>Ansible: re-run if anything fails, idempotent, reports per-task</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<!-- ════════════ v4.x ════════════ -->
+
+<div class="card v4x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v4.x Docker</span>
+    <span class="emoji">🖼️</span>
+    <h3>What is a Docker image?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A cake recipe — read-only instructions. You can bake many cakes from one recipe but can't change the recipe by baking.</div>
+    <ul>
+      <li>A frozen, read-only template of an app + its environment</li>
+      <li>Stored in a registry (Docker Hub, ghcr.io)</li>
+      <li>Built from a <span class="code">Dockerfile</span></li>
+      <li><span class="code">docker pull lobehub/lobe-chat:latest</span> downloads it</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v4x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v4.x Docker</span>
+    <span class="emoji">🎂</span>
+    <h3>What is a Docker container?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A cake baked from the recipe (image). Multiple cakes can be baked from one recipe simultaneously — each independent.</div>
+    <ul>
+      <li>A running instance of a Docker image</li>
+      <li>Has its own filesystem, network, processes</li>
+      <li>Stop a container → data is gone (unless you use volumes)</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v4x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v4.x Docker</span>
+    <span class="emoji">📄</span>
+    <h3>What is a Dockerfile?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A shopping list + cooking instructions combined — tells Docker exactly what to put in the image.</div>
+    <ul>
+      <li><span class="code">FROM node:22-alpine</span> — start from a base image</li>
+      <li><span class="code">RUN git clone ...</span> — run commands during build</li>
+      <li><span class="code">COPY . /app</span> — copy files into the image</li>
+      <li><span class="code">EXPOSE 3210</span> — document which port the app uses</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v4x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v4.x Docker</span>
+    <span class="emoji">🏪</span>
+    <h3>What is Docker Hub vs ghcr.io?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Docker Hub = the public App Store. ghcr.io = a private store in GitHub's building (can be restricted to team members).</div>
+    <ul>
+      <li>Docker Hub: <span class="code">lobehub/lobe-chat</span> — public, anyone can pull</li>
+      <li>ghcr.io: GitHub Container Registry — can be public or private</li>
+      <li>Teacher's image (<span class="code">ghcr.io/oriolrius/lobechat</span>) was private → couldn't pull on EC2</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v4x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v4.x Docker</span>
+    <span class="emoji">🎼</span>
+    <h3>What is Docker Compose?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">An orchestra conductor. Instead of each musician starting independently, one conductor (Compose) starts them all in the right order.</div>
+    <ul>
+      <li>Defines and runs multi-container apps in one YAML file</li>
+      <li><span class="code">docker compose up -d</span> — starts all containers</li>
+      <li>Handles startup order, shared networks, volumes</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v4x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v4.x Docker</span>
+    <span class="emoji">💾</span>
+    <h3>What is a Docker volume and why is it critical?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">An external hard drive for the container. Container is deleted → drive survives with all data intact.</div>
+    <ul>
+      <li>Persistent storage that outlives a container's lifecycle</li>
+      <li>Without volumes: every container restart = fresh empty database</li>
+      <li>v4.x uses <span class="code">postgres_data</span> and <span class="code">minio_data</span> volumes</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v4x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v4.x Docker</span>
+    <span class="emoji">🌐</span>
+    <h3>Why does LobeChat connect to `postgres:5432` not `localhost:5432`?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Each container is an isolated apartment. "Localhost" means your own apartment — not your neighbor's (the postgres container).</div>
+    <ul>
+      <li>Each container has its own network namespace</li>
+      <li>Docker Compose creates a shared network between containers</li>
+      <li>Service name = hostname: <span class="code">postgres</span> resolves to the postgres container's IP</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v4x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v4.x Docker</span>
+    <span class="emoji">🔗</span>
+    <h3>What does `depends_on: condition: service_healthy` do?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Don't open the restaurant until the kitchen is fully set up and passing health inspection.</div>
+    <ul>
+      <li>Waits for a container's healthcheck to pass before starting the next</li>
+      <li>LobeChat waits for postgres to accept connections</li>
+      <li>Without this: LobeChat starts before DB is ready → crash → restart loop</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v4x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v4.x Docker</span>
+    <span class="emoji">⚡</span>
+    <h3>Why is Docker deployment 10× faster than building from source?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Buying a pre-assembled IKEA table vs building from raw wood. Same result, fraction of the time.</div>
+    <ul>
+      <li>v3.x: 3500+ packages installed, SPA built, Next.js built → ~20 min</li>
+      <li>v4.x: pull pre-built image, run it → ~2 min</li>
+      <li>Build happened once when the image was created — never repeated on deploy</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v4x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v4.x Docker</span>
+    <span class="emoji">🔁</span>
+    <h3>What does `restart: unless-stopped` do?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Bounce-back — if the container falls down, it gets back up automatically. Unless YOU told it to stop.</div>
+    <ul>
+      <li>Restarts container if it crashes or if the host reboots</li>
+      <li>Does NOT restart if you manually run <span class="code">docker stop</span></li>
+      <li>Essential for production — your app must survive crashes</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v4x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v4.x Docker</span>
+    <span class="emoji">🔍</span>
+    <h3>How do you check if Docker containers are running?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <ul>
+      <li><span class="code">docker compose ps</span> — list containers + status</li>
+      <li><span class="code">docker compose logs -f</span> — stream live logs from all</li>
+      <li><span class="code">docker compose logs lobechat</span> — logs for one container</li>
+      <li><span class="code">docker compose down</span> — stop and remove all containers</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<!-- ════════════ v5.x ════════════ -->
+
+<div class="card v5x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v5.x CF + Ansible</span>
+    <span class="emoji">🤖</span>
+    <h3>What is Ansible?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A remote control for servers. You write a list of tasks on your laptop; Ansible SSHs in and runs them on the server one by one.</div>
+    <ul>
+      <li>Configuration management tool — automates server setup</li>
+      <li>Idempotent: run it 10 times, same result</li>
+      <li>No agent needed on the server — just SSH</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v5x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v5.x CF + Ansible</span>
+    <span class="emoji">📋</span>
+    <h3>What is an Ansible playbook?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A step-by-step recipe for setting up a server — written in human-readable YAML, not cryptic bash.</div>
+    <ul>
+      <li>A YAML file listing all tasks to run</li>
+      <li>Each task has a name, a module, and parameters</li>
+      <li>Run with: <span class="code">uv run ansible-playbook -i inventory.yml playbook.yml</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v5x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v5.x CF + Ansible</span>
+    <span class="emoji">✅</span>
+    <h3>What does the Ansible PLAY RECAP tell you?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">The scoreboard at the end of the game. You want: everything done, nothing broken.</div>
+    <ul>
+      <li><strong>ok=46</strong> — tasks verified/completed</li>
+      <li><strong>changed=34</strong> — tasks that modified something</li>
+      <li><strong>failed=0</strong> — 🎉 no errors → deployment succeeded</li>
+      <li><strong>unreachable=0</strong> — SSH connected fine</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v5x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v5.x CF + Ansible</span>
+    <span class="emoji">📁</span>
+    <h3>What is the Ansible inventory file?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Ansible's address book — tells it where to go and how to knock on the door.</div>
+    <ul>
+      <li>Lists hostnames/IPs, SSH user, SSH key path</li>
+      <li>Gitignored because the IP changes each deployment</li>
+      <li>Generated from template: <span class="code">sed "s/&lt;PUBLIC_IP&gt;/$IP/" inventory.yml.template</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v5x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v5.x CF + Ansible</span>
+    <span class="emoji">🔔</span>
+    <h3>What is an Ansible handler?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">A waiter you ring only when needed. You notify them → they come at the end of the meal (not immediately).</div>
+    <ul>
+      <li>A task that only runs when explicitly notified</li>
+      <li>Runs once at the end of the play (not immediately)</li>
+      <li>Example: update config file → notify "Restart LobeChat" handler</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v5x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v5.x CF + Ansible</span>
+    <span class="emoji">👑</span>
+    <h3>What does `become: true` mean in Ansible?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Asking your friend who can sudo to run this command as root on your behalf.</div>
+    <ul>
+      <li>Runs the task as root (privilege escalation via sudo)</li>
+      <li>Required for: installing packages, editing system files, managing services</li>
+      <li>Can be set per-task or for the entire playbook</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v5x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v5.x CF + Ansible</span>
+    <span class="emoji">🔧</span>
+    <h3>Why `uv run ansible-playbook` and not just `ansible-playbook`?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Like saying "run this program using the virtual environment I set up" instead of using the system's default (which might not have it).</div>
+    <ul>
+      <li><span class="code">uv</span> manages a Python environment where Ansible is installed</li>
+      <li>Ansible is not in the system PATH — only in the uv environment</li>
+      <li>First run ~25 min: uv downloads + compiles all Python packages</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v5x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v5.x CF + Ansible</span>
+    <span class="emoji">⏳</span>
+    <h3>Why wait 1–2 min after CloudFormation finishes before running Ansible?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">The building is "open" before the elevator is working. EC2 is "running" before SSH is ready to accept connections.</div>
+    <ul>
+      <li>CloudFormation marks EC2 as running once it boots</li>
+      <li>But SSH daemon may still be initializing</li>
+      <li>If Ansible connects too early → "unreachable" error</li>
+      <li>Wait ~1–2 min or use Ansible's <span class="code">wait_for_connection</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v5x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v5.x CF + Ansible</span>
+    <span class="emoji">🎯</span>
+    <h3>What is the point of separating CloudFormation (infra) from Ansible (app)?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Building construction vs interior design. The contractor builds the structure (CloudFormation); the interior designer furnishes it (Ansible). Different skills, different tools, separate concerns.</div>
+    <ul>
+      <li>CloudFormation: VPC, EC2, SG — infra that rarely changes</li>
+      <li>Ansible: app config, packages, services — changes frequently</li>
+      <li>Update the app? Just re-run Ansible. Don't touch the infra.</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card v5x" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">v5.x CF + Ansible</span>
+    <span class="emoji">🔁</span>
+    <h3>If Ansible fails halfway through, what do you do?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Like a dishwasher that stopped mid-cycle — just press start again. It knows which dishes are already clean.</div>
+    <ul>
+      <li>Ansible is idempotent — just re-run the same command</li>
+      <li>Completed tasks will be skipped (already in desired state)</li>
+      <li>Failed task will be retried</li>
+      <li>This is Ansible's biggest advantage over UserData</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<!-- ════════════ GOTCHAS ════════════ -->
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">💻</span>
+    <h3>You `export`-ed AWS credentials but they don't work in Claude Code. Why?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">You whispered a secret to one person in a room — others in the same room didn't hear it. Each shell is its own world.</div>
+    <ul>
+      <li><span class="code">export</span> sets variables only in the current shell process</li>
+      <li>New shells (Claude Code's bash calls) don't inherit them</li>
+      <li>Fix: write to <span class="code">~/.aws/credentials</span> — AWS CLI reads this file from disk in every new shell</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">⏰</span>
+    <h3>AWS commands suddenly fail with "ExpiredToken". What happened?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Your day pass to the theme park expired at midnight. Get a new one from the ticket booth.</div>
+    <ul>
+      <li>Sandbox credentials are temporary (a few hours)</li>
+      <li>Go to Innovation Sandbox portal → Access Keys → copy fresh credentials</li>
+      <li>Write them to <span class="code">~/.aws/credentials</span></li>
+      <li>Verify: <span class="code">aws sts get-caller-identity</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">📦</span>
+    <h3>The Vite build crashes on `@tanstack/react-query@5.94.4`. What broke?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Someone shipped a box of IKEA furniture with the instruction manual but forgot to put the actual parts inside.</div>
+    <ul>
+      <li>Package published without its compiled <span class="code">build/</span> directory</li>
+      <li>Only source code (<span class="code">src/</span>) included — not the compiled output</li>
+      <li>Fix: download v5.91.3, copy its <span class="code">build/</span> into the 5.94.4 installation in <span class="code">node_modules/.pnpm/</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">⬜</span>
+    <h3>LobeChat loads but shows a blank white page after login. Why?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">You built the backstage (Next.js server) but forgot to build the actual stage where the show happens (Vite SPA).</div>
+    <ul>
+      <li>The chat UI is a Vite SPA — needs to be built separately</li>
+      <li>Missing: <span class="code">pnpm run build:spa</span> and <span class="code">pnpm run build:spa:copy</span></li>
+      <li>Without it, the route returns an empty HTML shell — blank page</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">🐘</span>
+    <h3>pg_search extension fails even after installing the package. What's missing?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">You bought the tool but forgot to pack it in the backpack before leaving. PostgreSQL needs it at startup.</div>
+    <ul>
+      <li>Install the .deb → add to <span class="code">shared_preload_libraries</span> → <span class="code">systemctl restart postgresql</span> → <span class="code">CREATE EXTENSION</span></li>
+      <li>All 4 steps are required — skipping any one breaks it</li>
+      <li>Forgetting the restart is the most common mistake</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">🔑</span>
+    <h3>You have the .pem file but SSH says "Permission denied". Why?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">You have a key, but it's for a different lock — the key pair was deleted from AWS and recreated.</div>
+    <ul>
+      <li>The .pem is just your private key — AWS has the public key</li>
+      <li>If key pair was deleted/recreated in AWS, the keys don't match</li>
+      <li>Also check: <span class="code">chmod 400 ~/.ssh/lobechat-key.pem</span> (too-open permissions = SSH rejects it)</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">🔒</span>
+    <h3>Can't overwrite the .pem file — "Permission denied". Why?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">You locked your diary and forgot you can't add pages without unlocking it first.</div>
+    <ul>
+      <li><span class="code">chmod 400</span> = read-only, even for the owner</li>
+      <li>Can't redirect into a read-only file</li>
+      <li>Fix: <span class="code">rm -f ~/.ssh/lobechat-key.pem</span> first, then create new one</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">☁️</span>
+    <h3>CloudFormation says CREATE_COMPLETE but LobeChat isn't running. How?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">The building passed inspection (EC2 booted) but the plumbing was never installed (UserData failed). Inspector only checked the walls.</div>
+    <ul>
+      <li>CF only knows the EC2 instance booted — not what UserData did</li>
+      <li>UserData could fail at step 5 and CF still says success</li>
+      <li>SSH in → <span class="code">sudo tail -50 /var/log/user-data.log</span> → find the failure</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">🐳</span>
+    <h3>The teacher's Docker image fails to pull on EC2. Why?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">The private store requires a membership card — EC2 has no card, so it's turned away at the door.</div>
+    <ul>
+      <li><span class="code">ghcr.io/oriolrius/lobechat</span> is a private GitHub registry</li>
+      <li>EC2 has no GitHub credentials → 403 Forbidden</li>
+      <li>Fix: use the official public image <span class="code">lobehub/lobe-chat:latest</span> instead</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">🌍</span>
+    <h3>File uploads to MinIO work on the server but fail in the browser. Why?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">You gave your friend directions to your house using your internal intercom code (localhost) — useless from outside the building.</div>
+    <ul>
+      <li><span class="code">S3_ENDPOINT=http://localhost:9000</span> → browser tries to connect to YOUR machine</li>
+      <li>Must use the EC2's public IP: <span class="code">S3_ENDPOINT=http://34.x.x.x:9000</span></li>
+      <li>Same for <span class="code">S3_PUBLIC_DOMAIN</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">💸</span>
+    <h3>Why is it critical to delete the stack immediately after the exercise?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Leaving the taxi meter running while you sleep. You'll wake up to a huge bill.</div>
+    <ul>
+      <li>c7a.2xlarge = ~$0.35/hour</li>
+      <li>Overnight = ~$8.40 of your sandbox budget</li>
+      <li>Exercise should cost &lt;$1 if deleted within 2–3 hours</li>
+      <li><span class="code">aws cloudformation delete-stack --stack-name lobechat</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">🐌</span>
+    <h3>First `uv run ansible-playbook` takes 25 minutes. Is it frozen?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Installing a brand new kitchen the first time takes all day — but reheating leftovers takes 2 minutes. First run is slow; subsequent runs are fast.</div>
+    <ul>
+      <li>uv is downloading and compiling all Python packages for the first time</li>
+      <li>This is completely normal — don't kill it</li>
+      <li>Subsequent runs use cached packages → much faster</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">📦</span>
+    <h3>Why can't `pnpm.overrides` fix the @tanstack version?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Asking the supermarket to only stock apples — they agree, but the delivery truck already brought oranges and they're already on the shelf.</div>
+    <ul>
+      <li>Without a lockfile, pnpm resolves versions fresh and picks 5.94.4</li>
+      <li>Overrides work for future installs but don't override already-resolved versions</li>
+      <li>Fix: manually copy <span class="code">build/</span> from 5.91.3 tarball into the 5.94.4 folder in <span class="code">node_modules/.pnpm/</span></li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">🚀</span>
+    <h3>The EC2 key pair exists locally but AWS rejects SSH. What do you check first?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">Your house key looks right but won't turn — the lock was changed and you have the old key.</div>
+    <ul>
+      <li>Check if the key exists in AWS: <span class="code">aws ec2 describe-key-pairs --key-names lobechat-key</span></li>
+      <li>If missing or from another session: delete local file, recreate</li>
+      <li>Also check: is the EC2 instance actually using that key pair?</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">🔄</span>
+    <h3>What happens if you run `systemctl start` instead of `systemctl restart` after changing a config?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">You updated the recipe but the chef didn't leave the kitchen — they keep cooking from memory (the old config).</div>
+    <ul>
+      <li><span class="code">start</span>: does nothing if the service is already running</li>
+      <li>The running process keeps the old config in memory</li>
+      <li>Your config changes have zero effect</li>
+      <li>Always use <span class="code">restart</span> after config changes</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+<div class="card gotcha" onclick="flip(this)">
+  <div class="card-front">
+    <span class="tag">Gotcha</span>
+    <span class="emoji">⛔</span>
+    <h3>UserData failed at step 15. Can you just re-run it?</h3>
+    <div class="hint">tap to reveal</div>
+  </div>
+  <div class="card-back">
+    <div class="answer-label">Answer</div>
+    <div class="metaphor">The self-destruct note burns after reading — you can't read it again. UserData runs once only.</div>
+    <ul>
+      <li>UserData is not idempotent — only runs on first boot</li>
+      <li>Options: SSH in and run the remaining steps manually</li>
+      <li>Or: destroy the stack and redeploy</li>
+      <li>That's why Ansible (v5.x) is better — just re-run the playbook</li>
+    </ul>
+    <div class="back-hint">tap to flip back</div>
+  </div>
+</div>
+
+</div><!-- end .grid -->
+
+<script>
+  function flip(card) {
+    card.classList.toggle('revealed');
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      const cards = document.querySelectorAll('.card');
+      let visible = 0;
+      cards.forEach(card => {
+        card.classList.remove('revealed');
+        if (filter === 'all' || card.classList.contains(filter)) {
+          card.classList.remove('hidden');
+          visible++;
+        } else {
+          card.classList.add('hidden');
+        }
+      });
+      document.getElementById('counter').textContent = visible + ' card' + (visible !== 1 ? 's' : '');
+    });
+  });
+</script>
+</body>
+</html>
